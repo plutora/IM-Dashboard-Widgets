@@ -1,5 +1,4 @@
-/*
-This script will create a useful series of widgets for the next 8 Enterpise releases and show the following information :
+/*This script will create a useful series of widgets for the next 8 Enterpise releases and show the following information :
  - List each phase along with Start and End Dates
  - The Go Live Date
  - The list of Features associated to the Enterprise release and all releases within the release manifest via the 'Features' button
@@ -17,32 +16,38 @@ Replase the <<INSERT SUB DOMAIN HERE>> text with your own subdomain
 <div class="company-carousel" ng-controller="COMPANYWidgetCarousel">
   <div class="carousel slide media-carousel" id="media">
     <div class="carousel-inner">
-      <div class="item" ng-repeat="oReleaseGrp in model.generalDatasource['e-releases'] track by $index" ng-class="{ active: $index == 0 }">
+      <div class="item" ng-repeat="oReleaseGrp in model.generalDatasource['c-releases'] track by $index" ng-class="{ active: $index == 0 }">
         <div class="row">
           <div class="col-md-3" ng-repeat="oRelease in oReleaseGrp track by $index">
             <div ng-if="oRelease['ID']" class="section">
-              <a href="<<INSERT SUB DOMAIN HERE>>.plutora.com/?release={{oRelease['ID']}}" target="blank"><h5 class="btn btn-default learnmore company-osw">{{oRelease['Name']}}</h5></a>
+              <a href="https://<<INSERT SUBDOMAIN NAME HERE>>.plutora.co/?release={{oRelease['ID']}}" target="blank"><h5 class="btn btn-default learnmore company-osw">{{oRelease['Name']}}</h5></a>
               <br />
-              <p>UAT Start<span class="pull-right">{{oRelease['sitStart']}}</span></p>
-              <p>UAT End<span class="pull-right">{{oRelease['sitEnd']}}</span></p>
-              
-        <p><strong>Go Live</strong> <strong class="pull-right text-bold" ng-bind="UtcToLocalTime(oRelease['ImplementationDate'])"></strong></p>
-        <button type="button" class="btn btn-default manifest-scope" ng-click="displayChanges(oRelease['Identifier'], oRelease['Name'])"> <!--<span style="font-size:15px;" class="glyphicon glyphicon-star"> </span>--> Features</button> 
-        <!-- <button type="button" class="btn btn-default manifest-scope" ng-click="displayDefects()"> <span style="font-size:15px;" class="glyphicon glyphicon-wrench"> </span> Defects</button> -->
-      </div>
-      </div>
+              <table class="phases-list">
+                <tbody>
+                  <tr class="all-changes" ng-repeat="phase in oRelease._phases">
+                    <td><div class="truncate" ng-bind="phase.Name"></div></td>
+                    <td><div ng-bind="UtcToLocalTime(phase.StartDate)"></div></td>
+                    <td><div ng-bind="UtcToLocalTime(phase.EndDate)"></div></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <p><strong>Go Live</strong> <strong class="pull-right text-bold" ng-bind="UtcToLocalTime(oRelease['ImplementationDate'])"></strong></p>
+              <button type="button" class="btn btn-default manifest-scope" ng-click="displayChanges(oRelease['Identifier'], oRelease['Name'])"> <!--<span style="font-size:15px;" class="glyphicon glyphicon-star"> </span>--> Features</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <a data-slide="prev" href="#media" class="left carousel-control">‹</a>
-   <a data-slide="next" href="#media" class="right carousel-control">›</a>
+    <a data-slide="next" href="#media" class="right carousel-control">›</a>
   </div>
+
 </div>
 
 
 
 /* Copy this CSS text into the CSS section of the widget editor */
-
 .manifest-scope {
   background-color:#3EB1DC!important;
   color:white;
@@ -269,7 +274,6 @@ imdashboard .company-carousel .phases-list .truncate{
 .phases-list tr td:nth-child(2) div {
     margin-right: 10px;
 }
-
 
 
 /* Copy this JS text into the JS section of the widget editor */
