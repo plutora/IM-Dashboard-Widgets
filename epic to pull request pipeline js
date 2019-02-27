@@ -1,0 +1,160 @@
+angular.module('plutora.core').controller('PipelineSummaryDashboard', [
+	'$scope',
+	function ($scope) {
+		$('.pipeline-summary-dashboard')
+			.closest('.panel')
+			.addClass('pipeline-summary-dashboard-panel');
+
+		console.log('Pipeline Summary Dashboard');
+
+		$scope.model = {
+			selectedRelease: null,
+			generalDatasource: [],
+			mermaidData: { change: null }
+		};
+
+		$scope.updateDatasourceValue = function (data, type) {
+			data.sort(function (a, b) {
+				return new Date(a['implementationDate']) - new Date(b['implementationDate']); // DESC
+			});
+			$scope.model.generalDatasource[type] = data;
+		};
+
+		$scope.getLetterForReleaseType = function (releaseType) {
+			if (releaseType === 'Enterprise') {
+				return 'E';
+			} else if (releaseType === 'Project') {
+				return 'P';
+			}
+
+			return 'I';
+		};
+
+		$scope.deselectRelease = function (e) {
+			e.stopPropagation();
+			e.preventDefault();
+			$scope.model.selectedRelease = null;
+		};
+
+		$scope.loadReleaseChanges = function (releaseId) {
+			return $.get("/proxy/api/releases/" + releaseId + '/changes?pageNum=&recordsPerPage=1000')
+				.then(function (data) {
+					if (data) {
+						return JSON.parse(data);
+					}
+				});
+		};
+
+		$scope.loadChangeData = function (changeId) {
+			var change = null;
+			return $.get("/proxy/api/changes/" + changeId).then(function (data) {
+				if (data) {
+					var changeData = JSON.parse(data);
+				}
+			});
+		};
+
+		$scope.loadLinkedChanges = function (changeId) {
+			var change = null;
+			return $.get("/proxy/api/changes/" + changeId + "/linkedchanges").then(function (data) {
+				if (data) {
+					return JSON.parse(data).parentChanges;
+				}
+			});
+		};
+
+
+		$scope.loadData = function () {
+
+			$scope.mermaidData = { change: null };
+			//for now, we are skipping the release selection, and starting with a hard coded release id
+			$scope.loadReleaseChanges("22bac845-f65e-e811-a981-ee34a4e98dd2")
+				.then(function (changes) {
+					var epics = changes.filter(function (item) { return item.changeType === 'Epic' });
+					return epics;
+				}).then(function (epics) {
+					if (epics.length > 0) {
+						$scope.mermaidData.change = {
+							changeId: epics[0].id,
+							displayId: epics[0].changeId,
+							name: epics[0].changeName,
+							userStories: []
+						};
+						return $scope.loadLinkedChanges(epics[0].id).then(function (stories) {
+							return stories;
+						});
+					}
+				}).then(function (stories) {
+					var loop = function (i) {
+						if (i < stories.length) {
+							stories[i].gitPrs = [];
+							$scope.loadLinkedChanges(stories[i].id).then(function (gitPrs) {
+								stories[i].gitPrs = gitPrs;
+								loop(i + 1);
+							});
+						}
+						else {
+							//loop finished
+							$scope.mermaidData.change.userStories = stories;
+							$scope.mermaidGraphFromMermaidData();
+						}
+					}
+					loop(0);
+				});
+		};
+
+
+		$scope.loadData();
+
+		$scope.sanitiseForMermaid = function (src) {
+			return src.replace('[', '').replace(']', '')
+		};
+
+		$scope.mermaidGraphFromMermaidData = function () {
+			var data = $scope.mermaidData;
+
+			var iframe = document.getElementById('mermaidIframe');
+			$(iframe).parent().hide();
+			var graphData = 'graph LR\n';
+
+			var parentLabel = data.change.changeId + '[#' + data.change.displayId + '<br>' + $scope.sanitiseForMermaid(data.change.name) + ']'
+
+			if (data.change.userStories.length == 0) {
+				graphData = parentLabel;
+			}
+			else {
+				data.change.userStories.forEach(function (item, index) {
+
+					var userStoryLabel = item.id + '[#' + item.changeId + '<br>' + $scope.sanitiseForMermaid(item.name) + ']';
+					graphData += parentLabel + '-->' + userStoryLabel + '\n';
+
+					item.gitPrs.forEach(function (pr, index) {
+						var prLabel = pr.id + '[#' + pr.changeId + '<br>' + $scope.sanitiseForMermaid(pr.name) + ']';
+						graphData += userStoryLabel + '-->' + prLabel + '\n';
+					});
+				});
+			}
+
+			console.log(graphData);
+
+			var html_string = '<html><head></head><body>'
+				+ '<div class="mermaid">\n'
+
+				+ graphData
+
+				+ '</div>'
+				+ '<script src="https://unpkg.com/mermaid@8.0.0/dist/mermaid.min.js"><\/script>';
+			+ '</body></html>';
+			var iframedoc = iframe.document;
+			if (iframe.contentDocument)
+				iframedoc = iframe.contentDocument;
+			else if (iframe.contentWindow)
+				iframedoc = iframe.contentWindow.document;
+
+			iframedoc.open();
+			iframedoc.writeln(html_string);
+			iframedoc.close();
+			$(iframe).parent().show();
+		};
+	}
+]);
