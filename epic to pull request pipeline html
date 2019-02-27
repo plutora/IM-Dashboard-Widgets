@@ -1,0 +1,70 @@
+<div class="pipeline-summary-dashboard" ng-controller="PipelineSummaryDashboard">
+	<div class="row">
+		<!-- 		<div class="filter-wrapper">
+			<form class="filter-bar form-inline col-sm-12">
+				<div>
+					<label>Release:</label>
+				</div>
+				<div class="filter-picker-wrapper">
+					<ui-select
+						class="filter-picker release-picker"
+						ng-model="model.selectedRelease"
+						on-select="selectRelease($select.selected, true)"
+						reset-search-input="false"
+					>
+						<ui-select-match placeholder="Type Release Name">
+							<span
+								class="release-type"
+								ng-class="{'sch-independent-label': $select.selected.plutoraReleaseType === 'Independent' || $select.selected.plutoraReleaseType === 'Integrated', 'sch-enterprise-label': $select.selected.plutoraReleaseType === 'Enterprise', 'releaseProjectIcon-label': $select.selected.plutoraReleaseType === 'Project'}"
+							>
+								{{ getLetterForReleaseType($select.selected.plutoraReleaseType) }}
+							</span>
+							<span class="release-title">{{ $select.selected.name }}</span>
+							<button
+								class="icon-remove"
+								type="button"
+								ng-if="model.selectedRelease && model.selectedRelease != 'All'"
+								ng-click="deselectRelease($event)"
+							></button>
+						</ui-select-match>
+						<ui-select-choices
+							repeat="item in model.generalDatasource['e-releases'] | filter: $select.search"
+							refresh="funcAsync($select.search)"
+							refresh-delay="1000"
+						>
+							<span
+								class="release-type"
+								ng-class="{'sch-independent-label': item.plutoraReleaseType === 'Independent' || item.plutoraReleaseType === 'Integrated', 'sch-enterprise-label': item.plutoraReleaseType === 'Enterprise', 'releaseProjectIcon-label': item.plutoraReleaseType === 'Project'}"
+							>
+								{{ getLetterForReleaseType(item.plutoraReleaseType) }}
+							</span>
+							<div ng-bind-html="(item.name | highlight: $select.search)"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+			</form>
+		</div>
+ -->
+	</div>
+	<div class="row">
+		<div class="pipe-part curved">Features/Epic</div>
+		<div class="pipe-part straight">User Stories</div>
+		<div class="pipe-part straight">Pull Requests</div>
+		<div class="pipe-part straight">Package</div>
+		<div class="pipe-part straight">Deploy</div>
+		<div class="pipe-part straight">Test</div>
+	</div>
+
+	<div class="row" style="height: 1000px;display: block;width: 700px;left: 20px;position: relative;">
+		<iframe frameborder='0' scrolling='no' id='mermaidIframe' style="width:100%; height:100%"></iframe>
+	</div>
+	<div class="background-image" style="
+    position: relative;
+    top: -1000px;
+    width: 774px;
+    height: 400px;
+    left: 800px;
+    background-size: 800px;
+    height: 400px;
+"></div>
+</div>
