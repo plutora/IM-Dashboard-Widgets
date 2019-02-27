@@ -1,0 +1,14 @@
+The JS file uses the mermaid library to link an Epic to User Stories to Pull requests
+
+The Change Type has these 3 literal values in it
+A Change was created of type epic and the Change ID is hard coded on line 71
+
+Changes of type User Story are imported via the Jenkins adapter with the Type set by default to user story
+For the purposes of the demo the User Stories are linked to the Epic by hand but in the future we plan
+to map them via a JIRA ID which is stored in JIRA ID Additional Info field
+
+Changes of type Pull Request are imported via an integration hub job to pull Open Pull Requests from GIT
+For the purposes of teh demo the Pull Requests are linked to a hard coded Change ID on line 559 of
+the integration hub job github-to-changes.js
+
+The images to the write suggesting packaging and deployment details are simply an image
